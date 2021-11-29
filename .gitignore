@@ -227,7 +227,9 @@ cython_debug/
 **/__pycache__
 *.pt
 **/vscode
+DS_Store
 .ignore
 cocoapi
 cell_data
 data 
+
