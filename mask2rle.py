@@ -58,7 +58,7 @@ ANNOTATION_DIR = os.path.join(ROOT_DIR, "annotations")
  
 INFO = {
     "description": "Cell Segmentation Dataset",
-    "url": "https://github.com/waspinator/pycococreator",
+    "url": "https://github.com/bocabolala",
     "version": "0.1.0",
     "year": 2021,
     "contributor": "Peiyu Lu",

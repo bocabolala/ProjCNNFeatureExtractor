@@ -27,10 +27,10 @@ from libsvm.svmutil import svm_train, svm_problem, svm_parameter
 
 
 
-for i, layer in enumerate(densenet121.layers[:20]):
-    if 'conv' is not in layer.name 
-        continue
-    print(layer.name, 'index', i)
+# for i, layer in enumerate(densenet121.layers[:20]):
+#     if 'conv' not in layer.name:
+#         continue
+#     print(layer.name, 'index', i)
 
 mdls = {}
 filters = {}
