@@ -230,3 +230,4 @@ cython_debug/
 .ignore
 cocoapi
 cell_data
+data 
