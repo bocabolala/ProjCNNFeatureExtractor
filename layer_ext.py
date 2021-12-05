@@ -36,21 +36,22 @@ mdls = {}
 filters = {}
 biases = {}
 
+# Set up models for extract Conv layer
 mdls['vgg16'] = models.vgg16.VGG16()
 mdls['mob224'] = models.mobilenet.MobileNet()
 mdls['inc_v2'] = models.inception_resnet_v2.InceptionResNetV2()
 mdls['eff_b2'] = models.efficientnet.EfficientNetB4()
 
-def extr_mdl_ker(mdls):
+def extract_con_kernel(mdls):
     for idx, mdl in enumerate(mdls):
         flag = True 
         l_idx = 0
         mdl_name = f"{mdl}" 
         layers = mdls[mdl_name].layers[:10]
+        # search in first 10 layers for conv layer  
         for l_idx, layer in enumerate(layers):
             if 'conv' in layer.name and 'pad' not in layer.name:
                 flag = False
-                
                 break 
             if not flag:
                 break
@@ -65,9 +66,9 @@ def extr_mdl_ker(mdls):
     return filters
 
 
-filters = extr_mdl_ker(mdls)
+filters = extract_con_kernel(mdls)
     
-    
+
 # vgg16_filters, vgg16_biases = mdls['vgg16'].layers[1].get_weights()
 
 
