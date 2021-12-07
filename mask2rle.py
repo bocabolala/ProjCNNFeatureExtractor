@@ -7,59 +7,66 @@ import json
 import fnmatch
 import datetime
 import numpy as np
+from tqdm import tqdm
 from PIL import Image
+
 from pycococreatortools import pycococreatortools
 
 
 def rgb2masks(label_name):
     # load images
     label_id = os.path.split(label_name)[-1].split('.')[0]
-    label = cv2.imread(label_name, 1)
+    label = cv2.imread(label_name, cv2.IMREAD_GRAYSCALE)
     # get images info
+ 
     h, w = label.shape[:2]
-    cell_dict = {}
-    idx = 0
+
     color_idx = {}
-    white_mask = np.ones((h, w, 3), dtype=np.uint8) * 255
-    # sort obj in 2 classes, output to 2 images
 
-    label_color, coler_count = np.unique(label,return_counts=True) 
-    print(label_color, coler_count)
-    # print(color_idx[0])
-    for color, idx in enumerate(label_color):
-        print(f'{color}')
-        color_idx[f'{color}'] = np.where(label == label_color[idx])
-    print(label_color, coler_count)
-    print(color_idx[0])
-    # for i in range(h):
-    #     for j in range(w):
-    #         if tuple(label[i][j]) in cell_dict or tuple(label[i][j]) == (0, 0, 0):
-    #             continue
-    #         cell_dict[tuple(label[i][j])] = idx
-    #         mask = (label == label[i][j]).all(-1)
-    #         # create mask to each class
-    #         cells = np.where(mask[..., None], white_mask, 0)
+    cc_idx = {}
 
-    #         mask_name = './cell_data/train/annotations/' + label_id + '_cell_' + str(idx) + '.png'
-    #         cv2.imwrite(mask_name, cells)
-    #         idx += 1
 
-# masks = np.unique()) 
+    # label_color, coler_count = np.unique(label,return_counts=True) 
+    # print(label_color, coler_count)
+
+    label_color = np.unique(label)
+    # print(label_color)
+
+    for idx, color in enumerate(label_color):
+        if idx == 0 and color == 0:
+            continue
+        temp = np.zeros((h,w),dtype=np.uint8)
+        # print('idx', idx, 'color', color)
+        color_idx[f'{color}'] = np.where(label == color)
+        # print(color_idx[f'{color}'])
+
+        temp[color_idx[f'{color}']] = 255
+        ret, binary = cv2.threshold(temp,127,255,cv2.THRESH_BINARY)
+        ret2, connected_conponents_labels = cv2.connectedComponents(binary, 8)
+
+        for idx2 in np.unique(connected_conponents_labels):
+            if idx2 == 0:
+                continue
+            single_cc = np.zeros((h, w),dtype=np.uint8)
+            cc_idx = np.where(connected_conponents_labels == idx2)
+            single_cc[cc_idx] = 255 
+
+            mask_name = './cell_data/train/annotations/'+ label_id + '_obj_' + str(idx) + '_part_' + str(idx2) + '.png'
+            cv2.imwrite(mask_name, single_cc)
+            # cv2.imshow('123', single_cc)
+            # cv2.waitKey(0)
+    
  
 label_dir = './data/MuLV/segmentation'
 label_list = glob.glob(os.path.join(label_dir, '*.png'))
 
 start = time.perf_counter()
-
-for idx, label_name in enumerate(label_list[:1]):
+for idx, label_name in enumerate(tqdm(label_list)):
     inner_timer_start = time.perf_counter()
-    print('Converting image', idx)
     rgb2masks(label_name)
     inner_time = time.perf_counter() - inner_timer_start
-    print(f"Image, {idx}, takes, {inner_time:.3f}, s")
 
-whole_time = time.perf_counter() - start
-print(f"Converting all images takes {whole_time:.3f} seconds")
+print(f"Converting all images takes {time.perf_counter() - start:.3f} seconds")
 
  
  
