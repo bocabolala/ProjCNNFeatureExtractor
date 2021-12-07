@@ -1,6 +1,6 @@
 import tensorflow.keras.applications as models 
-
-
+import tensorflow as tf
+import numpy as np 
 
 from matplotlib import pyplot
 # from tensorflow_examples.models.pix2pix import pix2pixd
@@ -41,6 +41,8 @@ mdls['vgg16'] = models.vgg16.VGG16()
 mdls['mob224'] = models.mobilenet.MobileNet()
 mdls['inc_v2'] = models.inception_resnet_v2.InceptionResNetV2()
 mdls['eff_b2'] = models.efficientnet.EfficientNetB4()
+mdls['res50'] = models.resnet50.ResNet50()
+
 
 def extract_con_kernel(mdls):
     for idx, mdl in enumerate(mdls):
@@ -67,7 +69,7 @@ def extract_con_kernel(mdls):
 
 
 filters = extract_con_kernel(mdls)
-    
+np.load('./filters',filters)
 
 # vgg16_filters, vgg16_biases = mdls['vgg16'].layers[1].get_weights()
 
