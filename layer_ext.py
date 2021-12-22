@@ -71,11 +71,10 @@ def extract_con_kernel(mdls):
 filters = extract_con_kernel(mdls)
 np.load('./filters',filters)
 
+
+
+
 # vgg16_filters, vgg16_biases = mdls['vgg16'].layers[1].get_weights()
-
-
-
-
 
 # resnet152_conv_feature = resnet152.layers[2].get_weights   # get conv1 conv weight in resnet
 # densenet121_conv_feature = densenet121.layers[2].get_weights  # get conv1-conv weight in densenet
