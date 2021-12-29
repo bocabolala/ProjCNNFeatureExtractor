@@ -66,7 +66,7 @@ for idx, label_name in enumerate(tqdm(label_list)):
     rgb2masks(label_name)
     inner_time = time.perf_counter() - inner_timer_start
 
-print(f"Converting all images takes {time.perf_counter() - start:.3f} seconds")
+print(f"Converting all images takes {time.perf_counter() - start:.2f} seconds")
 
  
  

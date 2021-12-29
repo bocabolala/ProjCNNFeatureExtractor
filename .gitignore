@@ -232,6 +232,5 @@ DS_Store
 cocoapi
 cell_data
 data 
-tf_cls_demo.py
-FCN.py
+test.ipynb
 
