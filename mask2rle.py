@@ -13,6 +13,10 @@ from PIL import Image
 from pycococreatortools import pycococreatortools
 
 
+ROOT_DIR = './data/MuLV/'
+IMAGE_DIR = os.path.join(ROOT_DIR, "gray")
+ANNOTATION_DIR = os.path.join(ROOT_DIR, "annotations/")
+
 def rgb2masks(label_name):
     # load images
     label_id = os.path.split(label_name)[-1].split('.')[0]
@@ -24,7 +28,6 @@ def rgb2masks(label_name):
     color_idx = {}
 
     cc_idx = {}
-
 
     # label_color, coler_count = np.unique(label,return_counts=True) 
     # print(label_color, coler_count)
@@ -46,34 +49,38 @@ def rgb2masks(label_name):
 
         for idx2 in np.unique(connected_conponents_labels):
             if idx2 == 0:
-                continue
+                continue  # skip background with index == 0
             single_cc = np.zeros((h, w),dtype=np.uint8)
             cc_idx = np.where(connected_conponents_labels == idx2)
             single_cc[cc_idx] = 255 
 
-            mask_name = './cell_data/train/annotations/'+ label_id + '_obj_' + str(idx) + '_part_' + str(idx2) + '.png'
+            mask_name = ANNOTATION_DIR + label_id + '_obj_' + str(idx) + '_part_' + str(idx2) + '.png'
             cv2.imwrite(mask_name, single_cc)
             # cv2.imshow('123', single_cc)
             # cv2.waitKey(0)
     
- 
-label_dir = './data/MuLV/segmentation'
-label_list = glob.glob(os.path.join(label_dir, '*.png'))
+
+LABEL_DIR = os.path.join(ROOT_DIR, 'segmentation')
+LABEL_LIST = glob.glob(os.path.join(LABEL_DIR, '*.png'))
+
 
 start = time.perf_counter()
-for idx, label_name in enumerate(tqdm(label_list)):
-    inner_timer_start = time.perf_counter()
+
+for idx, label_name in enumerate(tqdm(LABEL_LIST)):
+    os.makedirs(ANNOTATION_DIR, exist_ok=True)
+    # inner_timer_start = time.perf_counter()
     rgb2masks(label_name)
-    inner_time = time.perf_counter() - inner_timer_start
+    # inner_time = time.perf_counter() - inner_timer_start
 
 print(f"Converting all images takes {time.perf_counter() - start:.2f} seconds")
 
  
+# ROOT_DIR = './data/MuLV/'
+# IMAGE_DIR = os.path.join(ROOT_DIR, "gray")
+# ANNOTATION_DIR = os.path.join(ROOT_DIR, "annotations")
  
-ROOT_DIR = './data/MuLV/'
-IMAGE_DIR = os.path.join(ROOT_DIR, "")
-ANNOTATION_DIR = os.path.join(ROOT_DIR, "annotations")
- 
+
+# Basic info fot COCO format  
 INFO = {
     "description": "Segmentation Dataset",
     "url": "https://github.com/bocabolala",
@@ -177,5 +184,5 @@ def main():
         json.dump(coco_output, output_json_file)
  
  
-# if __name__ == "__main__":
-#     main()
+if __name__ == "__main__":
+    main()
