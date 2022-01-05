@@ -1,40 +1,16 @@
-import tensorflow.keras.applications as models 
-import tensorflow as tf
 import numpy as np 
+import tensorflow as tf
+import tensorflow.keras.applications as models 
+# import tensorflow_datasets as tfds
+# from libsvm.svmutil import svm_train, svm_problem, svm_parameter
 
 from matplotlib import pyplot
-# from tensorflow_examples.models.pix2pix import pix2pixd
-# import tensorflow_datasets as tfds
-from libsvm.svmutil import svm_train, svm_problem, svm_parameter
-
-# resnet152 = tf.keras.applications.resnet.ResNet152(
-#     include_top=True, weights='imagenet', input_tensor=None,
-#     input_shape=None, pooling=None, classes=1000,
-# )
 
 
-# densenet121 = tf.keras.applications.densenet.DenseNet121(
-#     include_top=True, weights='imagenet', input_tensor=None,
-#     input_shape=None, pooling=None, classes=1000
-# )
-
-
-# extract feature conv layers in ResNet
-# for i, layer in enumerate(resnet152.layers[:20]):
-#     print(i,'\t',layer.trainable,'\t  :',layer.name)
-
-# extract feature conv layers in ResNet
-
-
-
-# for i, layer in enumerate(densenet121.layers[:20]):
-#     if 'conv' not in layer.name:
-#         continue
-#     print(layer.name, 'index', i)
 
 mdls = {}
 filters = {}
-biases = {}
+filters_flat = {}
 
 # Set up models for extract Conv layer
 mdls['vgg16'] = models.vgg16.VGG16()
@@ -47,30 +23,32 @@ mdls['res50'] = models.resnet50.ResNet50()
 def extract_con_kernel(mdls):
     for idx, mdl in enumerate(mdls):
         flag = True 
-        l_idx = 0
+        layer_idx = 0
         mdl_name = f"{mdl}" 
         layers = mdls[mdl_name].layers[:10]
         # search in first 10 layers for conv layer  
-        for l_idx, layer in enumerate(layers):
+        for layer_idx, layer in enumerate(layers):
             if 'conv' in layer.name and 'pad' not in layer.name:
                 flag = False
                 break 
             if not flag:
                 break
-        ker_weight = mdls[mdl_name].layers[l_idx].get_weights()
+        ker_weight = mdls[mdl_name].layers[layer_idx].get_weights()
         # print(ker_weight)
         if len(ker_weight) == 1:
             filters[mdl_name] = ker_weight[0]
         else:
             filters[mdl_name], _ = ker_weight
-        print(mdl_name, ' layer:', l_idx, layer.name, ' shape', filters[mdl_name].shape)
+
+        filters_flat[mdl_name] = tf.reduce_mean(filters[mdl_name], axis=2)
+
+        print(mdl_name, 'RGB layer:', layer_idx, layer.name, ' shape', filters[mdl_name].shape)
+        print(mdl_name, 'Gray layer:', layer_idx, layer.name, ' shape', filters_flat[mdl_name].shape)
         
-    return filters
+    return filters, filters_flat
 
 
-filters = extract_con_kernel(mdls)
-np.load('./filters',filters)
-
+filters, filters_flat = extract_con_kernel(mdls)
 
 
 
