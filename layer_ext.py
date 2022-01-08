@@ -52,7 +52,3 @@ filters, filters_flat = extract_con_kernel(mdls)
 
 np.save('./filters', filters)
 np.save('./filters_flat', filters_flat)
-
-
-
-
