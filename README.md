@@ -1,3 +1,9 @@
-prjViro --> my independent branch of Vironova-Project
+# Dev Branch for Vironova Segmentation
 
-Mask R-CNN model underdev
+## PIPELINE WITHIN THIS REPO MAY NOT READY TO RUN 
+
+## READY TO RUN MODULES
+
+### kernel extractor:  layer_ext.py
+
+### COCO dataset creator:  mask2rle.py 
