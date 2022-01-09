@@ -40,7 +40,9 @@ def extract_con_kernel(mdls):
         else:
             filters[mdl_name], _ = ker_weight
 
-        filters_flat[mdl_name] = tf.reduce_mean(filters[mdl_name], axis=2)
+        filters[mdl_name] = np.transpose(filters[mdl_name],(3,0,1,2))
+
+        filters_flat[mdl_name] = tf.reduce_mean(filters[mdl_name], axis=3)
 
         print(mdl_name, 'RGB layer:', layer_idx, layer.name, ' shape', filters[mdl_name].shape)
         print(mdl_name, 'Gray layer:', layer_idx, layer.name, ' shape', filters_flat[mdl_name].shape)
