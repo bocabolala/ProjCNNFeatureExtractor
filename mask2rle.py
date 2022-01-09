@@ -9,9 +9,11 @@ from tqdm import tqdm
 from PIL import Image
 from pycococreatortools import pycococreatortools
 
-# PATH
-ROOT_DIR = './data/MuLV'
-# ROOT_DIR = './data/Polio and proteasomes'
+
+# Path to dataset 
+# ROOT_DIR = './data/MuLV'
+ROOT_DIR = './data/Polio and proteasomes'
+
 IMAGE_DIR = os.path.join(ROOT_DIR, "gray")
 ANNOTATION_DIR = os.path.join(ROOT_DIR, "annotations")
 
@@ -35,7 +37,7 @@ LICENSES = [
         "url": "https://creativecommons.org/licenses/by-nc-sa/2.0/"
     }
 ]
-
+# Provided with 3 categories since the dataset has only 3 
 CATEGORIES = [
     {
         'id': 1,
@@ -157,7 +159,6 @@ def coco_json_creator():
                 for annotation_filename in annotation_files:
                     # check class depending name
                     class_id = [x['id'] for x in CATEGORIES if x['name'] in annotation_filename][0]
-
                     category_info = {'id': class_id, 'is_crowd': 'crowd' in image_filename}
                     binary_mask = np.asarray(Image.open(annotation_filename)
                                              .convert('1')).astype(np.uint8)
@@ -166,14 +167,15 @@ def coco_json_creator():
                         segmentation_id, image_id, category_info, binary_mask,
                         image.size, tolerance=2)
 
+                    # print('anno_info',annotation_info)
                     if annotation_info is not None:
                         coco_output["annotations"].append(annotation_info)
 
-                    segmentation_id = + 1
+                    segmentation_id +=1
 
-            image_id = + 1
+            image_id +=1
 
-    with open('{}/object_segmentation.json'.format(ROOT_DIR), 'w') as output_json_file:
+    with open('{}/instance_train2021.json'.format(ROOT_DIR), 'w') as output_json_file:
         json.dump(coco_output, output_json_file)
 
 
