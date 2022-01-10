@@ -1,9 +1,13 @@
-# Dev Branch for Vironova Segmentation
+# Vironova Segmentation
 
-## PIPELINE WITHIN THIS REPO MAY NOT READY TO RUN 
+## TO BUILD COSTUMED MASK R-CNN MODEL
 
-## READY TO RUN MODULES
+### 1. Run Mask2RLE to convert mask annotation to coco RLE(Run-Length Encoding) format annotation
 
-### kernel extractor:  layer_ext.py
+### 2. Run Jupyter Notebook mrcnn_train.ipynb, to generate and train the model 
 
-### COCO dataset creator:  mask2rle.py 
+### 3. Run kernel_extractor.ipynb to extract kernel from the models. (Recommend the weights of conv1_conv in stage 1 of ResNet backbone)
+
+## TO USE KERNEL FROM PRETRAIN MODELS
+
+### Run layer_ext.py and costum your models.
