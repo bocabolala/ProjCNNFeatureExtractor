@@ -10,4 +10,4 @@
 
 ## TO USE KERNEL FROM PRETRAIN MODELS
 
-### Run layer_ext.py and costum your models.
+### Run layer_ext.py and costomize your models.
