@@ -11,14 +11,14 @@ from pycococreatortools import pycococreatortools
 
 
 # Path to dataset 
-# ROOT_DIR = './data/MuLV'
-ROOT_DIR = './data/Polio and proteasomes'
+# ROOT_PATH = './data/MuLV'
+ROOT_PATH = './data/Polio and proteasomes'
 
-IMAGE_DIR = os.path.join(ROOT_DIR, "gray")
-ANNOTATION_DIR = os.path.join(ROOT_DIR, "annotations")
 
-LABEL_DIR = os.path.join(ROOT_DIR, 'segmentation')
-LABEL_LIST = glob.glob(os.path.join(LABEL_DIR, '*.png'))
+# Path name for subfolder, e.g. ./data/fish/image, ./data/fish/label
+# IMG_SUB_PATH should be 'image', LABEL_SUB_PATH = 'label' 
+IMG_SUB_PATH = 'gray'
+LABEL_SUB_PATH = 'segmentation'
 
 # Basic info for COCO format
 INFO = {
@@ -54,57 +54,64 @@ CATEGORIES = [
         'name': 'obj_3',
         'supercategory': 'particles',
     },
+    {
+        'id': 4,
+        'name': 'obj_4',
+        'supercategory': 'particles',
+    }, 
+    {
+        'id': 5,
+        'name': 'obj_5',
+        'supercategory': 'particles',
+    },
+
 ]
 
 
-def rgb2masks(label_name):
-    # load images
-    label_id = os.path.split(label_name)[-1].split('.')[0]
-    label = cv2.imread(label_name, cv2.IMREAD_GRAYSCALE)
-    # get images info
-
-    h, w = label.shape[:2]
-    color_idx = {}
-    cc_idx = {}
-
-    # label_color, coler_count = np.unique(label,return_counts=True)
-    # print(label_color, coler_count)
-
-    label_color = np.unique(label)
-    # print(label_color)
-
-    for idx, color in enumerate(label_color):
-        if idx == 0 and color == 0:
-            continue
-        temp = np.zeros((h, w), dtype=np.uint8)
-        # print('idx', idx, 'color', color)
-        color_idx[f'{color}'] = np.where(label == color)
-        # print(color_idx[f'{color}'])
-        temp[color_idx[f'{color}']] = 255
-        ret, binary = cv2.threshold(temp, 127, 255, cv2.THRESH_BINARY)
-        ret2, connected_components_labels = cv2.connectedComponents(binary, 8)
-
-        for idx2 in np.unique(connected_components_labels):
-            if idx2 == 0:
-                continue  # skip background with index == 0
-            single_cc = np.zeros((h, w), dtype=np.uint8)
-            cc_idx = np.where(connected_components_labels == idx2)
-            single_cc[cc_idx] = 255
-
-            mask_name = label_id + '_obj_' + str(idx) + '_part_' + str(idx2) + '.png'
-
-            cv2.imwrite(os.path.join(ANNOTATION_DIR, mask_name), single_cc)
-            # cv2.imshow('123', single_cc)
-            # cv2.waitKey(0)
-
-
-def img2instance():
+def img2instance(label_dir, annotation_dir):
     print('Converting image-level masks to instance-level masks')
-    for idx, label_name in enumerate(tqdm(LABEL_LIST)):
-        os.makedirs(ANNOTATION_DIR, exist_ok=True)
-        # inner_timer_start = time.perf_counter()
-        rgb2masks(label_name)
-        # inner_time = time.perf_counter() - inner_timer_start
+    label_list = glob.glob(os.path.join(label_dir, '*.png'))
+
+    for idx, label_name in enumerate(tqdm(label_list)):
+        os.makedirs(annotation_dir, exist_ok=True)
+        # load images
+        label_id = os.path.split(label_name)[-1].split('.')[0]
+        label = cv2.imread(label_name, cv2.IMREAD_GRAYSCALE)
+        # get images info
+
+        h, w = label.shape[:2]
+        color_idx = {}
+        cc_idx = {}
+
+        # label_color, coler_count = np.unique(label,return_counts=True)
+        # print(label_color, coler_count)
+
+        label_color = np.unique(label)
+        # print(label_color)
+
+        for idx, color in enumerate(label_color):
+            if idx == 0 and color == 0:
+                continue
+            temp = np.zeros((h, w), dtype=np.uint8)
+            # print('idx', idx, 'color', color)
+            color_idx[f'{color}'] = np.where(label == color)
+            # print(color_idx[f'{color}'])
+            temp[color_idx[f'{color}']] = 255
+            ret, binary = cv2.threshold(temp, 127, 255, cv2.THRESH_BINARY)
+            ret, connected_components_labels = cv2.connectedComponents(binary, 8)
+
+            for idx2 in np.unique(connected_components_labels):
+                if idx2 == 0:
+                    continue  # skip background with index == 0
+                single_cc = np.zeros((h, w), dtype=np.uint8)
+                cc_idx = np.where(connected_components_labels == idx2)
+                single_cc[cc_idx] = 255
+
+                mask_name = label_id + '_obj_' + str(idx) + '_part_' + str(idx2) + '.png'
+
+                cv2.imwrite(os.path.join(annotation_dir, mask_name), single_cc)
+                # cv2.imshow('123', single_cc)
+                # cv2.waitKey(0)
 
 
 def filter_for_jpeg(root, files):
@@ -126,7 +133,7 @@ def filter_for_annotations(root, files, image_filename):
     return files
 
 
-def coco_json_creator():
+def coco_json_creator(root_dir, image_dir, annotation_dir):
     coco_output = {
         "info": INFO,
         "licenses": LICENSES,
@@ -140,8 +147,9 @@ def coco_json_creator():
 
     print('Creating COCO json over instance-level masks')
     np.warnings.filterwarnings('ignore', category=np.VisibleDeprecationWarning)
+
     # filter for jpeg images
-    for root, _, files in os.walk(IMAGE_DIR):
+    for root, _, files in os.walk(image_dir):
         image_files = filter_for_jpeg(root, files)
 
         # go through each image
@@ -152,7 +160,7 @@ def coco_json_creator():
             coco_output["images"].append(image_info)
 
             # filter for associated png annotations
-            for root, _, files in os.walk(ANNOTATION_DIR):
+            for root, _, files in os.walk(annotation_dir):
                 annotation_files = filter_for_annotations(root, files, image_filename)
 
                 # go through each associated annotation
@@ -175,11 +183,17 @@ def coco_json_creator():
 
             image_id +=1
 
-    with open('{}/instance_train2021.json'.format(ROOT_DIR), 'w') as output_json_file:
+    with open('{}/instance_train2021.json'.format(root_dir), 'w') as output_json_file:
         json.dump(coco_output, output_json_file)
 
 
 if __name__ == "__main__":
-    img2instance()
-    coco_json_creator()
+    
+    image_path = os.path.join(ROOT_PATH, IMG_SUB_PATH)
+    annotation_path = os.path.join(ROOT_PATH, "annotations")
+    label_path = os.path.join(ROOT_PATH, LABEL_SUB_PATH)
+    img2instance(label_path, annotation_path)
+    coco_json_creator(ROOT_PATH, image_path, annotation_path)
+
+        
 
