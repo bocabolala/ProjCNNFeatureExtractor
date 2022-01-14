@@ -11,9 +11,9 @@ from pycococreatortools import pycococreatortools
 
 
 # Path to dataset 
-ROOT_PATH = './data/MuLV'
+# ROOT_PATH = './data/MuLV'
 # ROOT_PATH = './data/Polio and proteasomes'
-
+ROOT_PATH = './data/mix'
 
 # Path name for subfolder, e.g. ./data/fish/image, ./data/fish/label
 # IMG_SUB_PATH should be 'image', LABEL_SUB_PATH = 'label' 
@@ -185,12 +185,11 @@ def coco_json_creator(root_dir, image_dir, annotation_dir):
 
             image_id +=1
 
-    with open('{}/instance_train2021.json'.format(root_dir), 'w') as output_json_file:
+    with open('{}/instance_train2021.json'.format(annotation_dir), 'w') as output_json_file:
         json.dump(coco_output, output_json_file)
 
 
 if __name__ == "__main__":
-    
     image_path = os.path.join(ROOT_PATH, IMG_SUB_PATH)
     annotation_path = os.path.join(ROOT_PATH, "annotations")
     label_path = os.path.join(ROOT_PATH, LABEL_SUB_PATH)
