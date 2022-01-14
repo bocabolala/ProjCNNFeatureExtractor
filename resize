@@ -1,0 +1,20 @@
+import os
+import re
+import cv2
+import glob
+import json
+import fnmatch
+import numpy as np
+from tqdm import tqdm
+from PIL import Image
+from pycococreatortools import pycococreatortools
+
+
+for image in glob.glob(os.path.join("./data/MuLV/gray","*.png")):
+    print(image)
+    ret, filename = os.path.split(image)
+    ori_img = cv2.imread(image)
+    print(ori_img.shape)
+    resized_img = cv2.resize(ori_img,(1000,1000))
+    print(resized_img.shape)
+    cv2.imwrite(os.path.join("./data/mix/gray", filename),resized_img)
